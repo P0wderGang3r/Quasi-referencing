@@ -9,6 +9,9 @@ var keyWordList: ArrayList<KeyWordStruct> = ArrayList()
 var keyWordMatrix: Array<Array<Int>> = arrayOf()
 var jointOccurrenceMatrix: Array<Array<Int>> = arrayOf()
 
+/*
+ * "Тихий" запуск
+ */
 fun start(path: String): Int {
     text = initText(path)
     sentences = initSentences(text)
@@ -20,6 +23,9 @@ fun start(path: String): Int {
     return 0
 }
 
+/*
+ * Запуск с выводом результатов действий
+ */
 fun logStart(path: String): Int {
     text = logInitText(path)
     sentences = logInitSentences(text)

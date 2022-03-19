@@ -68,7 +68,8 @@ fun logInitKeyWordMatrix(lKeyWordList: ArrayList<KeyWordStruct>): Array<Array<In
     return lKeyWordMatrix
 }
 
-fun logInitJointOccurrenceMatrix(lKeyWordList: ArrayList<KeyWordStruct>, lWords: ArrayList<ArrayList<String>>): Array<Array<Int>> {
+fun logInitJointOccurrenceMatrix(lKeyWordList: ArrayList<KeyWordStruct>,
+                                 lWords: ArrayList<ArrayList<String>>): Array<Array<Int>> {
     val lJointOccurrenceMatrix: Array<Array<Int>> = initJointOccurrenceMatrix(lKeyWordList, lWords)
 
     if (isLogInitJointOccurrenceMatrix) {

@@ -3,6 +3,9 @@ package inProcess
 import KeyWordStruct
 import java.io.FileReader
 
+/*
+ * Считывание текста из файла.
+ */
 fun initText(fileName: String): String {
     val reader: FileReader
     var lText = ""
@@ -22,10 +25,16 @@ fun initText(fileName: String): String {
     return lText
 }
 
+/*
+ * Парсинг текста в набор предложений.
+ */
 fun initSentences(lText: String): List<String> {
     return lText.split(".", "?!", "!?", "?", "!")
 }
 
+/*
+ * Парсинг предложений в набор слов в предложениях.
+ */
 fun initWords(lSentences: List<String>): ArrayList<ArrayList<String>> {
     val lWords: ArrayList<ArrayList<String>> = ArrayList()
 
@@ -42,10 +51,20 @@ fun initWords(lSentences: List<String>): ArrayList<ArrayList<String>> {
     return lWords
 }
 
+
+/*
+ * Функция-затычка для сравнения слов.
+ * Затычка лишь потому, что тут буквально побуквенное сравнение.
+ * Возможно, заменю на более эффективную.
+ */
 fun checkWordEquality(keyWord: String, word: String): Boolean {
     return keyWord == word
 }
 
+/*
+ * Создание списка совпадающих слов.
+ * Также производит подсчёт количества совпадений.
+ */
 fun initKeyWordList(lWords: ArrayList<ArrayList<String>>): ArrayList<KeyWordStruct> {
     val lKeyWordList: ArrayList<KeyWordStruct> = ArrayList()
     var trigger: Boolean
@@ -69,7 +88,9 @@ fun initKeyWordList(lWords: ArrayList<ArrayList<String>>): ArrayList<KeyWordStru
     return lKeyWordList
 }
 
-
+/*
+ * Создание матрицы совпадения эквивалентных слов. По сути своей - диагональка с остальными полями нулей.
+ */
 fun initKeyWordMatrix(lKeyWordList: ArrayList<KeyWordStruct>): Array<Array<Int>> {
     val lKeyWordMatrix: Array<Array<Int>> = Array(lKeyWordList.size) { Array(lKeyWordList.size) { 0 } }
 
@@ -81,6 +102,8 @@ fun initKeyWordMatrix(lKeyWordList: ArrayList<KeyWordStruct>): Array<Array<Int>>
 }
 
 /*
+ * Создание матрицы совместных появлений соседних слов.
+ *
  * Тут стоит оставить себе на будущее объяснение.
  * Допустим, получаем следующее слово, соседей которого мы должны получить.
  * Проходимся по матрице по горизонтали.
