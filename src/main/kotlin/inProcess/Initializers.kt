@@ -54,7 +54,7 @@ fun initWords(lSentences: List<String>): ArrayList<ArrayList<String>> {
 
 /*
  * Функция-затычка для сравнения слов.
- * Затычка лишь потому, что тут буквально побуквенное сравнение.
+ * Затычка лишь потому, что тут буквально производится посимвольное сравнение.
  * Возможно, заменю на более эффективную.
  */
 fun checkWordEquality(keyWord: String, word: String): Boolean {
@@ -108,7 +108,8 @@ fun initKeyWordMatrix(lKeyWordList: ArrayList<KeyWordStruct>): Array<Array<Int>>
  * Допустим, получаем следующее слово, соседей которого мы должны получить.
  * Проходимся по матрице по горизонтали.
  * Если мы находим основное слово, совпадающее по горизонтали (а мы находим), то ищем соседа слева (справа) по вертикали.
- * В случае нахождения соседа (а мы его находим) добавляем к счётчику единицу и продолжаем проход по предложениям.
+ * В случае нахождения соседа (а мы его находим) добавляем к счётчику
+ * на пути их пересечения в матрице единицу и продолжаем проход по предложению(-ям).
  */
 fun initJointOccurrenceMatrix(lKeyWordList: ArrayList<KeyWordStruct>,
                               lWords: ArrayList<ArrayList<String>>): Array<Array<Int>> {
@@ -117,31 +118,31 @@ fun initJointOccurrenceMatrix(lKeyWordList: ArrayList<KeyWordStruct>,
     for (sentence in lWords) {
         for (iteration: Int in 0 until sentence.size) {
             if (iteration > 0) {
-                for (widthIteration in 0 until lKeyWordList.size) {
-                    if (lKeyWordList[widthIteration].word == sentence[iteration]) {
-                        for (heightIteration in 0 until lKeyWordList.size) {
-                            if (lKeyWordList[heightIteration].word == sentence[iteration - 1]) {
-                                lJointOccurrenceMatrix[widthIteration][heightIteration] += 1
-                                break
-                            }
-                        }
-                        break
-                    }
-                }
+                var widthIteration = 0
+                while (widthIteration < lKeyWordList.size &&
+                    !checkWordEquality(lKeyWordList[widthIteration].word, sentence[iteration]))
+                { widthIteration++ }
+
+                var heightIteration = 0
+                while (widthIteration < lKeyWordList.size &&
+                    !checkWordEquality(lKeyWordList[heightIteration].word, sentence[iteration - 1]))
+                {  heightIteration++ }
+
+                lJointOccurrenceMatrix[widthIteration][heightIteration] += 1
             }
 
             if (iteration < sentence.size - 1) {
-                for (widthIteration in 0 until lKeyWordList.size) {
-                    if (lKeyWordList[widthIteration].word == sentence[iteration]) {
-                        for (heightIteration in 0 until lKeyWordList.size) {
-                            if (lKeyWordList[heightIteration].word == sentence[iteration + 1]) {
-                                lJointOccurrenceMatrix[widthIteration][heightIteration] += 1
-                                break
-                            }
-                        }
-                        break
-                    }
-                }
+                var widthIteration = 0
+                while (widthIteration < lKeyWordList.size &&
+                    !checkWordEquality(lKeyWordList[widthIteration].word, sentence[iteration]))
+                { widthIteration++ }
+
+                var heightIteration = 0
+                while (widthIteration < lKeyWordList.size &&
+                    !checkWordEquality(lKeyWordList[heightIteration].word, sentence[iteration + 1]))
+                {  heightIteration++ }
+
+                lJointOccurrenceMatrix[widthIteration][heightIteration] += 1
             }
         }
     }
