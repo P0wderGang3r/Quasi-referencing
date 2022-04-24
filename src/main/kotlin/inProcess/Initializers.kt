@@ -1,6 +1,7 @@
 package inProcess
 
-import KeyWordStruct
+import Paragraph
+import WordList
 import java.io.FileReader
 
 /*
@@ -26,126 +27,74 @@ fun initText(fileName: String): String {
 }
 
 /*
- * Парсинг текста в набор предложений.
+ * Парсинг текста в набор абзацев.
  */
-fun initSentences(lText: String): List<String> {
-    return lText.split(".", "?!", "!?", "?", "!")
+fun initParagraphs(lText: String): ArrayList<String> {
+    return lText.split("\n") as java.util.ArrayList<String>
 }
 
 /*
- * Парсинг предложений в набор слов в предложениях.
+ * Парсинг абзацев в набор слов в них.
  */
-fun initWords(lSentences: List<String>): ArrayList<ArrayList<String>> {
-    val lWords: ArrayList<ArrayList<String>> = ArrayList()
+fun initWords(lParagraphs: String): ArrayList<String> {
+    val lWords = lParagraphs.lowercase().split(" ", ",", "–", ":", "«", "»", "\n", ".", "?!", "!?", "?", "!") as java.util.ArrayList<String>
 
-    for (sentence in lSentences) {
-        lWords.add(sentence.split(" ", ",", "–", ":", "«", "»", "\n") as java.util.ArrayList<String>)
-    }
-
-    for (line in lWords) {
-        line.removeIf { word -> word == "" }
-    }
-
-    lWords.removeIf { line -> line.size == 0 }
+    lWords.removeIf { word -> word == "" }
 
     return lWords
 }
 
-
 /*
- * Функция-затычка для сравнения слов.
- * Затычка лишь потому, что тут буквально производится посимвольное сравнение.
- * Возможно, заменю на более эффективную.
+ * Создание списка количества появлений слов в абзаце.
  */
-fun checkWordEquality(keyWord: String, word: String): Boolean {
-    return keyWord == word
+fun initWordOccurrenceList(lWords: ArrayList<String>): ArrayList<WordList> {
+    val lWordOccurrenceList: ArrayList<WordList> = ArrayList()
+    var trigger: Boolean
+
+    for (word in lWords) {
+        trigger = false
+        for (uniqueWord in lWordOccurrenceList) {
+            if (checkWordEquality(uniqueWord.word, word)) {
+                uniqueWord.weight += 1
+                trigger = true
+                break
+            }
+        }
+        if (!trigger) {
+            lWordOccurrenceList.add(WordList(word, 1.0))
+        }
+    }
+
+    return lWordOccurrenceList
 }
 
 /*
- * Создание списка совпадающих слов.
- * Также производит подсчёт количества совпадений.
+ * Создание списка количества появлений слов во всём тексте.
  */
-fun initKeyWordList(lWords: ArrayList<ArrayList<String>>): ArrayList<KeyWordStruct> {
-    val lKeyWordList: ArrayList<KeyWordStruct> = ArrayList()
+fun initGlobalWordOccurrenceList(paragraphs: ArrayList<Paragraph>): ArrayList<WordList> {
+    val lGlobalWordOccurrenceList: ArrayList<WordList> = ArrayList()
     var trigger: Boolean
 
-    for (sentence in lWords) {
-        for (word in sentence) {
+    //Проход по абзацам
+    for (paragraph in paragraphs) {
+        //Проход по словам в абзацах
+        for (wordListElem in paragraph.wordWeightList) {
             trigger = false
-            for (keyWord in lKeyWordList) {
-                if (checkWordEquality(keyWord.word, word)) {
-                    keyWord.occurrences += 1
+            //Проход по списку слов в глобальном реестре слов
+            for (globalWordListElem in lGlobalWordOccurrenceList) {
+                //Если найдено совпадение, то добавляем к глобальному счётчику слов счётчик слов из абзаца
+                if (checkWordEquality(wordListElem.word, globalWordListElem.word)) {
+                    globalWordListElem.weight += wordListElem.weight
                     trigger = true
                     break
                 }
             }
+            //Иначе добавляем новое слово с количеством локальных повторений в список
             if (!trigger) {
-                lKeyWordList.add(KeyWordStruct(word, 1))
+                lGlobalWordOccurrenceList.add(WordList(wordListElem.word, wordListElem.weight))
             }
         }
     }
 
-    return lKeyWordList
-}
-
-/*
- * Создание матрицы совпадения эквивалентных слов. По сути своей - диагональка с остальными полями нулей.
- */
-fun initKeyWordMatrix(lKeyWordList: ArrayList<KeyWordStruct>): Array<Array<Int>> {
-    val lKeyWordMatrix: Array<Array<Int>> = Array(lKeyWordList.size) { Array(lKeyWordList.size) { 0 } }
-
-    for ((iteration, width) in lKeyWordMatrix.withIndex()) {
-        width[iteration] = lKeyWordList[iteration].occurrences
-    }
-
-    return lKeyWordMatrix
-}
-
-/*
- * Создание матрицы совместных появлений соседних слов.
- *
- * Тут стоит оставить себе на будущее объяснение.
- * Допустим, получаем следующее слово, соседей которого мы должны получить.
- * Проходимся по матрице по горизонтали.
- * Если мы находим основное слово, совпадающее по горизонтали (а мы находим), то ищем соседа слева (справа) по вертикали.
- * В случае нахождения соседа (а мы его находим) добавляем к счётчику
- * на пути их пересечения в матрице единицу и продолжаем проход по предложению(-ям).
- */
-fun initJointOccurrenceMatrix(lKeyWordList: ArrayList<KeyWordStruct>,
-                              lWords: ArrayList<ArrayList<String>>): Array<Array<Int>> {
-    val lJointOccurrenceMatrix: Array<Array<Int>> = Array(lKeyWordList.size) { Array(lKeyWordList.size) { 0 } }
-
-    for (sentence in lWords) {
-        for (iteration: Int in 0 until sentence.size) {
-            if (iteration > 0) {
-                var widthIteration = 0
-                while (widthIteration < lKeyWordList.size &&
-                    !checkWordEquality(lKeyWordList[widthIteration].word, sentence[iteration]))
-                { widthIteration++ }
-
-                var heightIteration = 0
-                while (widthIteration < lKeyWordList.size &&
-                    !checkWordEquality(lKeyWordList[heightIteration].word, sentence[iteration - 1]))
-                {  heightIteration++ }
-
-                lJointOccurrenceMatrix[widthIteration][heightIteration] += 1
-            }
-
-            if (iteration < sentence.size - 1) {
-                var widthIteration = 0
-                while (widthIteration < lKeyWordList.size &&
-                    !checkWordEquality(lKeyWordList[widthIteration].word, sentence[iteration]))
-                { widthIteration++ }
-
-                var heightIteration = 0
-                while (widthIteration < lKeyWordList.size &&
-                    !checkWordEquality(lKeyWordList[heightIteration].word, sentence[iteration + 1]))
-                {  heightIteration++ }
-
-                lJointOccurrenceMatrix[widthIteration][heightIteration] += 1
-            }
-        }
-    }
-
-    return lJointOccurrenceMatrix
+    return lGlobalWordOccurrenceList
 }

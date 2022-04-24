@@ -1,6 +1,7 @@
 package logStart
 
-import KeyWordStruct
+import Paragraph
+import WordList
 import inProcess.*
 
 fun logInitText(fileName: String): String {
@@ -12,75 +13,67 @@ fun logInitText(fileName: String): String {
     return lText
 }
 
-fun logInitSentences(lText: String): List<String> {
-    val lSentences: List<String> = initSentences(lText)
+fun logInitParagraphs(lText: String): ArrayList<String> {
+    val lParagraphs: ArrayList<String> = initParagraphs(lText)
 
-    if (isLogInitSentences) {
-        for (lSentence in lSentences) {
-            println(lSentence)
+    if (isLogInitParagraphs) {
+        println("logInitParagraphs")
+        for (lParagraph in lParagraphs) {
+            println("vvvvvvvvvvvvvvvvvvvvv")
+            println(lParagraph)
+            println("^^^^^^^^^^^^^^^^^^^^^")
         }
         println()
     }
 
-    return lSentences
+    return lParagraphs
 }
 
-fun logInitWords(lSentences: List<String>): ArrayList<ArrayList<String>> {
-    val lWords: ArrayList<ArrayList<String>> = initWords(lSentences)
+fun logInitWords(lParagraph: String): ArrayList<String> {
+    val lWords: ArrayList<String> = initWords(lParagraph)
 
     if (isLogInitWords) {
-        for (line in lWords) {
-            for (word in line) {
-                print("|$word~")
-            }
-            println()
+        println("logInitWords")
+        println("vvvvvvvvvvvvvvvvvvvvv")
+        for (word in lWords) {
+            print("|$word~")
         }
+        println()
+        println("^^^^^^^^^^^^^^^^^^^^^")
+        println()
     }
 
     return lWords
 }
 
-fun logInitKeyWordList(lWords: ArrayList<ArrayList<String>>): ArrayList<KeyWordStruct> {
-    val lKeyWordList: ArrayList<KeyWordStruct> = initKeyWordList(lWords)
+fun logInitWordOccurrenceList(lWords: ArrayList<String>): ArrayList<WordList> {
+    val lWordOccurrenceList: ArrayList<WordList> = initWordOccurrenceList(lWords)
 
-    if (isLogInitKeyWordList) {
-        for (keyWord in lKeyWordList) {
-            println(keyWord.word + " " + keyWord.occurrences)
+    if (isLogInitWordOccurrenceList) {
+        println("logInitWordOccurrenceList")
+        println("vvvvvvvvvvvvvvvvvvvvv")
+        for (word in lWordOccurrenceList) {
+            println(word.word + " " + word.weight)
         }
+        println("^^^^^^^^^^^^^^^^^^^^^")
+        println()
     }
 
-    return lKeyWordList
+    return lWordOccurrenceList
 }
 
-fun logInitKeyWordMatrix(lKeyWordList: ArrayList<KeyWordStruct>): Array<Array<Int>> {
-    val lKeyWordMatrix: Array<Array<Int>> = initKeyWordMatrix(lKeyWordList)
+fun logInitGlobalWordOccurrenceList(paragraphs: ArrayList<Paragraph>): ArrayList<WordList> {
+    val lWordOccurrenceList: ArrayList<WordList> = initGlobalWordOccurrenceList(paragraphs)
 
-    if (isLogInitKeyWordMatrix) {
-        for ((iteration, width) in lKeyWordMatrix.withIndex()) {
-            for (height in width) {
-                print("$height | ")
-            }
-            print(lKeyWordList[iteration].word)
-            println()
+    if (isLogInitGlobalWordOccurrenceList) {
+        println("logInitGlobalWordOccurrenceList")
+        println("vvvvvvvvvvvvvvvvvvvvv")
+        for (word in lWordOccurrenceList) {
+            println(word.word + " " + word.weight)
         }
+        println("^^^^^^^^^^^^^^^^^^^^^")
+        println()
     }
 
-    return lKeyWordMatrix
-}
-
-fun logInitJointOccurrenceMatrix(lKeyWordList: ArrayList<KeyWordStruct>,
-                                 lWords: ArrayList<ArrayList<String>>): Array<Array<Int>> {
-    val lJointOccurrenceMatrix: Array<Array<Int>> = initJointOccurrenceMatrix(lKeyWordList, lWords)
-
-    if (isLogInitJointOccurrenceMatrix) {
-        for ((iteration, width) in lJointOccurrenceMatrix.withIndex()) {
-            for (height in width) {
-                print("$height | ")
-            }
-            print(lKeyWordList[iteration].word)
-            println()
-        }
-    }
-
-    return lJointOccurrenceMatrix
+    return lWordOccurrenceList
 }

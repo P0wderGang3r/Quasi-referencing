@@ -1,24 +1,28 @@
 import inProcess.*
 import logStart.*
 
-var text: String = ""
-lateinit var sentences: List<String>
-var words: ArrayList<ArrayList<String>> = ArrayList()
-var keyWordList: ArrayList<KeyWordStruct> = ArrayList()
+var paragraphs: ArrayList<Paragraph> = ArrayList()
 
-var keyWordMatrix: Array<Array<Int>> = arrayOf()
-var jointOccurrenceMatrix: Array<Array<Int>> = arrayOf()
+var text: String = ""
 
 /*
  * "Тихий" запуск
  */
 fun start(path: String): Int {
     text = initText(path)
-    sentences = initSentences(text)
-    words = initWords(sentences)
-    keyWordList = initKeyWordList(words)
-    keyWordMatrix = initKeyWordMatrix(keyWordList)
-    jointOccurrenceMatrix = initJointOccurrenceMatrix(keyWordList, words)
+    val lParagraphs = initParagraphs(text)
+
+    lParagraphs.removeIf { paragraph -> paragraph.isEmpty() }
+
+    for (paragraph in lParagraphs) {
+        val words = initWords(paragraph)
+        val wordOccurrenceList = initWordOccurrenceList(words)
+        paragraphs.add(Paragraph(paragraph, words, wordOccurrenceList))
+    }
+
+    val globalWordOccurrenceList = initGlobalWordOccurrenceList(paragraphs)
+
+    makeWordListWeight(paragraphs, globalWordOccurrenceList)
 
     return 0
 }
@@ -28,11 +32,20 @@ fun start(path: String): Int {
  */
 fun logStart(path: String): Int {
     text = logInitText(path)
-    sentences = logInitSentences(text)
-    words = logInitWords(sentences)
-    keyWordList = logInitKeyWordList(words)
-    keyWordMatrix = logInitKeyWordMatrix(keyWordList)
-    jointOccurrenceMatrix = logInitJointOccurrenceMatrix(keyWordList, words)
+
+    val lParagraphs = logInitParagraphs(text)
+    lParagraphs.removeIf { paragraph -> paragraph.isEmpty() }
+
+    for (paragraph in lParagraphs) {
+        val words = logInitWords(paragraph)
+        val wordOccurrenceList = logInitWordOccurrenceList(words)
+        paragraphs.add(Paragraph(paragraph, words, wordOccurrenceList))
+    }
+
+    val globalWordOccurrenceList = logInitGlobalWordOccurrenceList(paragraphs)
+
+    makeWordListWeight(paragraphs, globalWordOccurrenceList)
+    logParagraphStatus(paragraphs)
 
     return 0
 }
